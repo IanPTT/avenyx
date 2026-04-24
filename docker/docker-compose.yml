@@ -14,7 +14,7 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      -avenyx-network
+      - avenyx-network
 
   api:
     build:
@@ -38,7 +38,7 @@ services:
       db:
         condition: service_healthy
     networks:
-      -avenyx-network
+      - avenyx-network
 
   frontend:
     build:
@@ -50,7 +50,7 @@ services:
     ports:
       - "3001:3001"
     networks:
-      -avenyx-network
+      - avenyx-network
 
   admin:
     build:
@@ -62,7 +62,10 @@ services:
     ports:
       - "3002:3002"
     networks:
-      -avenyx-network
+      - avenyx-network
+
+volumes:
+  postgres_data:
 
 networks:
   avenyx-network:
