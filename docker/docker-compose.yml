@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   db:
     image: postgres:15
@@ -7,7 +5,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: avenyx
+      POSTGRES_DB:avenyx
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -16,13 +14,13 @@ services:
       timeout: 5s
       retries: 5
     networks:
-      - avenyx-network
+      -avenyx-network
 
   api:
     build:
-      context: ./api
+      context: ../api
       dockerfile: Dockerfile
-    container_name: avenyx-api
+    container_name:avenyx-api
     environment:
       DATABASE_URL: postgresql://postgres:postgres@db:5432/avenyx
       JWT_SECRET: ${JWT_SECRET:-avenyx-super-secret-key-change-in-production}
@@ -38,31 +36,31 @@ services:
       db:
         condition: service_healthy
     networks:
-      - avenyx-network
+      -avenyx-network
 
   frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile
-    container_name: avenyx-frontend
+    container_name:avenyx-frontend
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
     ports:
       - "3001:3001"
     networks:
-      - avenyx-network
+      -avenyx-network
 
   admin:
     build:
-      context: ./admin
+      context: ../admin
       dockerfile: Dockerfile
-    container_name: avenyx-admin
+    container_name:avenyx-admin
     environment:
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
     ports:
       - "3002:3002"
     networks:
-      - avenyx-network
+      -avenyx-network
 
 volumes:
   postgres_data:
