@@ -1,0 +1,73 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15
+    container_name: avenyx-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: avenyx
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - avenyx-network
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: avenyx-api
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/avenyx
+      JWT_SECRET: ${JWT_SECRET:-avenyx-super-secret-key-change-in-production}
+      RESEND_API_KEY: ${RESEND_API_KEY:-re_xxx}
+      FRONTEND_URL: ${FRONTEND_URL:-https://avenyx.qzz.io}
+      ADMIN_URL: ${ADMIN_URL:-https://admin.avenyx.qzz.io}
+      APK_STORAGE_PATH: /storage/apk
+    ports:
+      - "3000:3000"
+    volumes:
+      - apk_storage:/storage/apk
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - avenyx-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: avenyx-frontend
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+    ports:
+      - "3001:3001"
+    networks:
+      - avenyx-network
+
+  admin:
+    build:
+      context: ./admin
+      dockerfile: Dockerfile
+    container_name: avenyx-admin
+    environment:
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:3000}
+    ports:
+      - "3002:3002"
+    networks:
+      - avenyx-network
+
+volumes:
+  postgres_data:
+  apk_storage:
+
+networks:
+  avenyx-network:
+    driver: bridge
